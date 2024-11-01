@@ -5,36 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App de Encontros Seguros</title>
     
-    <!-- Firebase App (a base) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <!-- Firebase Auth -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .google-btn {
+            background: #4285f4;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>App de Encontros Seguros</h1>
-    <button id="loginBtn">Login com Google</button>
+    <div class="container">
+        <h1>App de Encontros Seguros</h1>
+        <button id="loginBtn" class="google-btn">Entrar com Google</button>
+    </div>
 
     <script>
-        // SUBSTITUA ESTE OBJETO com o que você copiou do Firebase Console
+        // SUBSTITUA TODO ESTE OBJETO com o que você copiou do Firebase Console
         const firebaseConfig = {
-  apiKey: "AIzaSyBRQqZwjznwgdZvLW3CdQOrS9HPEYt7JA4",
-  authDomain: "app123-789f8.firebaseapp.com",
-  projectId: "app123-789f8",
-  storageBucket: "app123-789f8.firebasestorage.app",
-  messagingSenderId: "598194933061",
-  appId: "1:598194933061:web:6d1dcfc860a38dd025822c",
-  measurementId: "G-VXWKHZ4T56"
-};
+            apiKey: "AIzaSyBRQqZwjznwgdZvLW3CdQOrS9HPEYt7JA4", // deve começar com AIza
+            authDomain: "app123-789f8.firebaseapp.com",
+            projectId: "app123-789f8",
+            storageBucket: "app123-789f8.firebasestorage.app",
+            messagingSenderId: "598194933061",
+            appId: "1:598194933061:web:6d1dcfc860a38dd025822c"
+            measurementId: "G-VXWKHZ4T56"
+        };
+
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
+        // Login com Google
         document.getElementById('loginBtn').addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             firebase.auth().signInWithPopup(provider)
                 .then((result) => {
-                    alert("Login bem sucedido!");
+                    console.log("Login bem sucedido!", result.user);
+                    alert("Login realizado com sucesso!");
                 })
                 .catch((error) => {
+                    console.error("Erro no login:", error);
                     alert("Erro no login: " + error.message);
                 });
         });
