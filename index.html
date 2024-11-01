@@ -8,7 +8,6 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
     
     <style>
         body {
@@ -45,16 +44,6 @@
             border-radius: 4px;
             display: none;
         }
-
-        .success {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .error {
-            background-color: #ffebee;
-            color: #c62828;
-        }
     </style>
 </head>
 <body>
@@ -65,56 +54,30 @@
     </div>
 
     <script>
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
         const firebaseConfig = {
             apiKey: "AIzaSyBRQqZwjznwgdZvLW3CdQOrS9HPEYt7JA4",
             authDomain: "app123-789f8.firebaseapp.com",
             projectId: "app123-789f8",
             storageBucket: "app123-789f8.firebasestorage.app",
             messagingSenderId: "598194933061",
-            appId: "1:598194933061:web:6d1dcfc860a38dd025822c",
-            measurementId: "G-VXWKHZ4T56"
+            appId: "1:598194933061:web:6d1dcfc860a38dd025822c"
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const analytics = firebase.analytics();
-
-        // Elementos DOM
-        const loginBtn = document.getElementById('loginBtn');
-        const statusMessage = document.getElementById('statusMessage');
-
-        // Função para mostrar mensagens
-        function showMessage(message, isError = false) {
-            statusMessage.textContent = message;
-            statusMessage.style.display = 'block';
-            statusMessage.className = `status ${isError ? 'error' : 'success'}`;
-        }
 
         // Login com Google
-        loginBtn.addEventListener('click', () => {
+        document.getElementById('loginBtn').addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             firebase.auth().signInWithPopup(provider)
                 .then((result) => {
                     console.log("Login bem sucedido!", result.user);
-                    showMessage("Login realizado com sucesso!");
-                    analytics.logEvent('login_success');
+                    alert("Login realizado com sucesso!");
                 })
                 .catch((error) => {
                     console.error("Erro no login:", error);
-                    showMessage("Erro no login: " + error.message, true);
-                    analytics.logEvent('login_error');
+                    alert("Erro no login: " + error.message);
                 });
-        });
-
-        // Monitor de estado de autenticação
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                showMessage(`Bem-vindo, ${user.displayName}!`);
-                loginBtn.textContent = "Sair";
-            } else {
-                loginBtn.textContent = "Entrar com Google";
-            }
         });
     </script>
 </body>
