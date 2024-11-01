@@ -8,6 +8,7 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
     
     <style>
         body {
@@ -54,11 +55,12 @@
             storageBucket: "app123-789f8.firebasestorage.app",
             messagingSenderId: "598194933061",
             appId: "1:598194933061:web:6d1dcfc860a38dd025822c"
-            measurementId: "G-VXWKHZ4T56"
+            measurementId: "G-VXWKHZ4T56" // Adicione sua measurementId aqui
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+        const analytics = firebase.analytics();
 
         // Login com Google
         document.getElementById('loginBtn').addEventListener('click', () => {
@@ -66,10 +68,12 @@
             firebase.auth().signInWithPopup(provider)
                 .then((result) => {
                     console.log("Login bem sucedido!", result.user);
+                    analytics.logEvent('login_success');
                     alert("Login realizado com sucesso!");
                 })
                 .catch((error) => {
                     console.error("Erro no login:", error);
+                    analytics.logEvent('login_error');
                     alert("Erro no login: " + error.message);
                 });
         });
