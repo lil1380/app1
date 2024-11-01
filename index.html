@@ -11,218 +11,258 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        /* ... Estilos anteriores ... */
+
+        .match-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .btn {
-            background: #4285f4;
+        .like-btn {
+            background: #4CAF50;
             color: white;
-            padding: 12px 24px;
+            padding: 8px 16px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
         }
 
-        .btn:hover {
-            background: #3367d6;
-        }
-
-        .profile-section {
-            display: none;
-        }
-
-        .login-section {
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
+        .dislike-btn {
+            background: #f44336;
+            color: white;
+            padding: 8px 16px;
+            border: none;
             border-radius: 4px;
-            box-sizing: border-box;
+            cursor: pointer;
         }
 
-        .user-photo {
-            width: 100px;
-            height: 100px;
+        .matches-tab {
+            padding: 20px;
+        }
+
+        .match-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .nav-badge {
+            background: #f44336;
+            color: white;
+            padding: 2px 6px;
             border-radius: 50%;
-            margin: 10px auto;
-            display: block;
+            font-size: 12px;
+            margin-left: 5px;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>App de Encontros Seguros</h1>
-            <button id="logoutBtn" class="btn" style="display: none;">Sair</button>
-        </div>
+    <!-- Adicione uma nova aba para matches -->
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="showSection('profile')">Meu Perfil</button>
+        <button class="nav-tab" onclick="showSection('people')">Pessoas</button>
+        <button class="nav-tab" onclick="showSection('matches')">
+            Matches
+            <span id="matchBadge" class="nav-badge">0</span>
+        </button>
+    </div>
 
-        <div id="loginSection" class="login-section">
-            <h2>Bem-vindo!</h2>
-            <p>Entre para conhecer pessoas de forma segura</p>
-            <button id="loginBtn" class="btn">Entrar com Google</button>
-        </div>
-
-        <div id="profileSection" class="profile-section">
-            <h2>Meu Perfil</h2>
-            <img id="userPhoto" class="user-photo" src="/api/placeholder/100/100" alt="Foto do perfil">
-            <form id="profileForm">
-                <div class="form-group">
-                    <label for="name">Nome</label>
-                    <input type="text" id="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="age">Idade</label>
-                    <input type="number" id="age" required min="18">
-                </div>
-                <div class="form-group">
-                    <label for="bio">Sobre mim</label>
-                    <textarea id="bio" rows="4"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="lookingFor">Procurando por</label>
-                    <select id="lookingFor">
-                        <option value="friendship">Amizade</option>
-                        <option value="dating">Relacionamento</option>
-                        <option value="both">Ambos</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn">Salvar Perfil</button>
-            </form>
+    <!-- Adicione uma nova seção para matches -->
+    <div id="matchesSection" class="section matches-tab">
+        <h2>Meus Matches</h2>
+        <div id="matchesList" class="people-grid">
+            <!-- Matches serão adicionados aqui -->
         </div>
     </div>
 
+    <!-- Adicione notificação de match -->
+    <div id="matchNotification" class="match-notification">
+        Você tem um novo match!
+    </div>
+
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBRQqZwjznwgdZvLW3CdQOrS9HPEYt7JA4",
-            authDomain: "app123-789f8.firebaseapp.com",
-            projectId: "app123-789f8",
-            storageBucket: "app123-789f8.firebasestorage.app",
-            messagingSenderId: "598194933061",
-            appId: "1:598194933061:web:6d1dcfc860a38dd025822c"
-        };
+        // ... Código anterior ...
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // Elementos DOM
-        const loginSection = document.getElementById('loginSection');
-        const profileSection = document.getElementById('profileSection');
-        const loginBtn = document.getElementById('loginBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const profileForm = document.getElementById('profileForm');
-        const userPhoto = document.getElementById('userPhoto');
-
-        // Login com Google
-        loginBtn.addEventListener('click', () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .catch(error => {
-                    console.error("Erro no login:", error);
-                    alert("Erro no login: " + error.message);
-                });
-        });
-
-        // Logout
-        logoutBtn.addEventListener('click', () => {
-            auth.signOut().then(() => {
-                console.log('Usuário deslogado');
-            }).catch(error => {
-                console.error('Erro ao sair:', error);
-            });
-        });
-
-        // Monitor de estado de autenticação
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                // Usuário logado
-                loginSection.style.display = 'none';
-                profileSection.style.display = 'block';
-                logoutBtn.style.display = 'block';
-                userPhoto.src = user.photoURL || '/api/placeholder/100/100';
-                loadUserProfile(user);
-            } else {
-                // Usuário deslogado
-                loginSection.style.display = 'block';
-                profileSection.style.display = 'none';
-                logoutBtn.style.display = 'none';
-            }
-        });
-
-        // Carregar perfil do usuário
-        function loadUserProfile(user) {
-            db.collection('users').doc(user.uid).get()
-                .then(doc => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        document.getElementById('name').value = data.name || user.displayName || '';
-                        document.getElementById('age').value = data.age || '';
-                        document.getElementById('bio').value = data.bio || '';
-                        document.getElementById('lookingFor').value = data.lookingFor || 'friendship';
-                    } else {
-                        // Perfil novo - preencher nome do Google
-                        document.getElementById('name').value = user.displayName || '';
-                    }
-                });
+        // Adicione ao createPersonCard:
+        function createPersonCard(userData) {
+            const div = document.createElement('div');
+            div.className = 'person-card';
+            div.innerHTML = `
+                <img class="person-photo" src="${userData.photoURL || '/api/placeholder/200/200'}" alt="Foto">
+                <div class="person-info">
+                    <div class="person-name">${userData.name}</div>
+                    <div class="person-age">${userData.age} anos</div>
+                    <button onclick="showProfile('${userData.uid}')" class="btn">Ver Perfil</button>
+                    <div class="match-buttons">
+                        <button onclick="like('${userData.uid}')" class="like-btn">👍</button>
+                        <button onclick="dislike('${userData.uid}')" class="dislike-btn">👎</button>
+                    </div>
+                </div>
+            `;
+            return div;
         }
 
-        // Salvar perfil
-        profileForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const user = auth.currentUser;
-            if (!user) return;
+        // Sistema de Match
+        async function like(userId) {
+            const currentUser = auth.currentUser;
+            if (!currentUser) return;
 
-            const profileData = {
-                name: document.getElementById('name').value,
-                age: parseInt(document.getElementById('age').value),
-                bio: document.getElementById('bio').value,
-                lookingFor: document.getElementById('lookingFor').value,
-                updatedAt: new Date()
-            };
-
-            db.collection('users').doc(user.uid).set(profileData, { merge: true })
-                .then(() => {
-                    alert('Perfil salvo com sucesso!');
-                })
-                .catch(error => {
-                    console.error('Erro ao salvar:', error);
-                    alert('Erro ao salvar perfil: ' + error.message);
+            try {
+                // Salvar o like
+                await db.collection('likes').add({
+                    from: currentUser.uid,
+                    to: userId,
+                    timestamp: new Date()
                 });
+
+                // Verificar se existe match
+                const theirLike = await db.collection('likes')
+                    .where('from', '==', userId)
+                    .where('to', '==', currentUser.uid)
+                    .get();
+
+                if (!theirLike.empty) {
+                    // É um match!
+                    await createMatch(currentUser.uid, userId);
+                    showMatchNotification();
+                }
+            } catch (error) {
+                console.error("Erro ao dar like:", error);
+                alert("Erro ao dar like: " + error.message);
+            }
+        }
+
+        function dislike(userId) {
+            // Implementar lógica de dislike se necessário
+            console.log("Dislike em:", userId);
+        }
+
+        async function createMatch(user1Id, user2Id) {
+            try {
+                await db.collection('matches').add({
+                    users: [user1Id, user2Id],
+                    timestamp: new Date()
+                });
+                updateMatchBadge();
+            } catch (error) {
+                console.error("Erro ao criar match:", error);
+            }
+        }
+
+        function showMatchNotification() {
+            const notification = document.getElementById('matchNotification');
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        async function loadMatches() {
+            const currentUser = auth.currentUser;
+            if (!currentUser) return;
+
+            const matchesList = document.getElementById('matchesList');
+            matchesList.innerHTML = 'Carregando matches...';
+
+            try {
+                const matchesSnapshot = await db.collection('matches')
+                    .where('users', 'array-contains', currentUser.uid)
+                    .get();
+
+                matchesList.innerHTML = '';
+
+                for (const matchDoc of matchesSnapshot.docs) {
+                    const matchData = matchDoc.data();
+                    const otherUserId = matchData.users.find(id => id !== currentUser.uid);
+                    
+                    const userDoc = await db.collection('users').doc(otherUserId).get();
+                    const userData = userDoc.data();
+
+                    const matchCard = createMatchCard(userData);
+                    matchesList.appendChild(matchCard);
+                }
+
+                if (matchesList.children.length === 0) {
+                    matchesList.innerHTML = 'Você ainda não tem matches.';
+                }
+            } catch (error) {
+                console.error("Erro ao carregar matches:", error);
+                matchesList.innerHTML = 'Erro ao carregar matches.';
+            }
+        }
+
+        function createMatchCard(userData) {
+            const div = document.createElement('div');
+            div.className = 'person-card';
+            div.innerHTML = `
+                <img class="person-photo" src="${userData.photoURL || '/api/placeholder/200/200'}" alt="Foto">
+                <div class="person-info">
+                    <div class="person-name">${userData.name}</div>
+                    <div class="person-age">${userData.age} anos</div>
+                    <button onclick="startChat('${userData.uid}')" class="btn">Iniciar Chat</button>
+                </div>
+            `;
+            return div;
+        }
+
+        async function updateMatchBadge() {
+            const currentUser = auth.currentUser;
+            if (!currentUser) return;
+
+            const matchesSnapshot = await db.collection('matches')
+                .where('users', 'array-contains', currentUser.uid)
+                .get();
+
+            const badge = document.getElementById('matchBadge');
+            const count = matchesSnapshot.size;
+
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'inline' : 'none';
+        }
+
+        // Atualizar a função showSection
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(sectionName + 'Section').classList.add('active');
+            event.target.classList.add('active');
+
+            if (sectionName === 'people') {
+                loadPeople();
+            } else if (sectionName === 'matches') {
+                loadMatches();
+            }
+        }
+
+        // Adicionar ao onAuthStateChanged
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                updateMatchBadge();
+                // ... resto do código ...
+            }
         });
     </script>
 </body>
