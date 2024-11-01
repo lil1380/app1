@@ -8,6 +8,7 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     
     <style>
         body {
@@ -24,10 +25,16 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
         
-        .google-btn {
+        .btn {
             background: #4285f4;
             color: white;
             padding: 12px 24px;
@@ -35,22 +42,87 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            margin-top: 20px;
         }
 
-        .status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
+        .btn:hover {
+            background: #3367d6;
+        }
+
+        .profile-section {
             display: none;
+        }
+
+        .login-section {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .user-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 10px auto;
+            display: block;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>App de Encontros Seguros</h1>
-        <button id="loginBtn" class="google-btn">Entrar com Google</button>
-        <div id="statusMessage" class="status"></div>
+        <div class="header">
+            <h1>App de Encontros Seguros</h1>
+            <button id="logoutBtn" class="btn" style="display: none;">Sair</button>
+        </div>
+
+        <div id="loginSection" class="login-section">
+            <h2>Bem-vindo!</h2>
+            <p>Entre para conhecer pessoas de forma segura</p>
+            <button id="loginBtn" class="btn">Entrar com Google</button>
+        </div>
+
+        <div id="profileSection" class="profile-section">
+            <h2>Meu Perfil</h2>
+            <img id="userPhoto" class="user-photo" src="/api/placeholder/100/100" alt="Foto do perfil">
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="name">Nome</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="age">Idade</label>
+                    <input type="number" id="age" required min="18">
+                </div>
+                <div class="form-group">
+                    <label for="bio">Sobre mim</label>
+                    <textarea id="bio" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="lookingFor">Procurando por</label>
+                    <select id="lookingFor">
+                        <option value="friendship">Amizade</option>
+                        <option value="dating">Relacionamento</option>
+                        <option value="both">Ambos</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Salvar Perfil</button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -65,18 +137,91 @@
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Elementos DOM
+        const loginSection = document.getElementById('loginSection');
+        const profileSection = document.getElementById('profileSection');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const profileForm = document.getElementById('profileForm');
+        const userPhoto = document.getElementById('userPhoto');
 
         // Login com Google
-        document.getElementById('loginBtn').addEventListener('click', () => {
+        loginBtn.addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(provider)
-                .then((result) => {
-                    console.log("Login bem sucedido!", result.user);
-                    alert("Login realizado com sucesso!");
-                })
-                .catch((error) => {
+            auth.signInWithPopup(provider)
+                .catch(error => {
                     console.error("Erro no login:", error);
                     alert("Erro no login: " + error.message);
+                });
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                console.log('Usuário deslogado');
+            }).catch(error => {
+                console.error('Erro ao sair:', error);
+            });
+        });
+
+        // Monitor de estado de autenticação
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Usuário logado
+                loginSection.style.display = 'none';
+                profileSection.style.display = 'block';
+                logoutBtn.style.display = 'block';
+                userPhoto.src = user.photoURL || '/api/placeholder/100/100';
+                loadUserProfile(user);
+            } else {
+                // Usuário deslogado
+                loginSection.style.display = 'block';
+                profileSection.style.display = 'none';
+                logoutBtn.style.display = 'none';
+            }
+        });
+
+        // Carregar perfil do usuário
+        function loadUserProfile(user) {
+            db.collection('users').doc(user.uid).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('name').value = data.name || user.displayName || '';
+                        document.getElementById('age').value = data.age || '';
+                        document.getElementById('bio').value = data.bio || '';
+                        document.getElementById('lookingFor').value = data.lookingFor || 'friendship';
+                    } else {
+                        // Perfil novo - preencher nome do Google
+                        document.getElementById('name').value = user.displayName || '';
+                    }
+                });
+        }
+
+        // Salvar perfil
+        profileForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const profileData = {
+                name: document.getElementById('name').value,
+                age: parseInt(document.getElementById('age').value),
+                bio: document.getElementById('bio').value,
+                lookingFor: document.getElementById('lookingFor').value,
+                updatedAt: new Date()
+            };
+
+            db.collection('users').doc(user.uid).set(profileData, { merge: true })
+                .then(() => {
+                    alert('Perfil salvo com sucesso!');
+                })
+                .catch(error => {
+                    console.error('Erro ao salvar:', error);
+                    alert('Erro ao salvar perfil: ' + error.message);
                 });
         });
     </script>
