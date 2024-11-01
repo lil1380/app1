@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App de Encontros Seguros</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.0/firebase-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.0/firebase-auth.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: #ffffff;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .main-content {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background-color: #1557b0;
+        }
+
+        .profile-section {
+            display: none;
+        }
+
+        .profile-section.active {
+            display: block;
+        }
+
+        #loginSection {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .safety-tips {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f0fe;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>App de Encontros Seguros</h1>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <section id="loginSection" class="card">
+            <h2>Bem-vindo!</h2>
+            <p>Encontre pessoas de forma segura e responsável</p>
+            <button class="btn" id="loginBtn">Entrar com Google</button>
+        </section>
+
+        <section id="profileSection" class="card profile-section">
+            <h2>Meu Perfil</h2>
+            <form id="profileForm">
+                <div>
+                    <label for="name">Nome:</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div>
+                    <label for="photo">Foto:</label>
+                    <input type="file" id="photo" accept="image/*">
+                </div>
+                <button type="submit" class="btn">Salvar Perfil</button>
+            </form>
+        </section>
+
+        <section class="card safety-tips">
+            <h3>Dicas de Segurança</h3>
+            <ul>
+                <li>Sempre encontre em locais públicos</li>
+                <li>Compartilhe sua localização com amigos</li>
+                <li>Mantenha conversas iniciais no app</li>
+                <li>Confie em seus instintos</li>
+            </ul>
+        </section>
+    </main>
+
+    <script>
+        // Configuração básica do Firebase (você preencherá depois)
+        const firebaseConfig = {
+            // Suas configurações do Firebase virão aqui
+        };
+
+        // Função para login (implementar depois)
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            alert('Função de login será implementada em breve!');
+        });
+
+        // Função para salvar perfil (implementar depois)
+        document.getElementById('profileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Função de salvar perfil será implementada em breve!');
+        });
+    </script>
+</body>
+</html>
